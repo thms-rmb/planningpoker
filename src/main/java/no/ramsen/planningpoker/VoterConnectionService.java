@@ -2,8 +2,10 @@ package no.ramsen.planningpoker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 
@@ -22,6 +24,21 @@ public class VoterConnectionService {
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.springTemplateEngine = springTemplateEngine;
         this.votingService = votingService;
+    }
+
+    @EventListener
+    public void onDisconnectEvent(SessionDisconnectEvent event) {
+        var principal = event.getUser();
+        if (principal == null)
+            return;
+        var userName = principal.getName();
+        if (!this.votingService.isSessionDefined(userName))
+            return;
+
+        var vote = this.votingService.getVoteBySession(userName);
+        var room = vote.getRoom();
+        this.votingService.removeSession(userName);
+        this.updateRoom(room);
     }
 
     public void updateRoom(String room) {

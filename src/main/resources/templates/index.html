@@ -30,7 +30,8 @@
                     <input type="text" class="form-control" name="room" id="room" th:field="*{room}">
                     <div class="form-text">Please enter a room ID.</div>
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button id="room-connect" type="submit" class="btn btn-primary">Connect</button>
+                <button id="room-disconnect" class="btn btn-outline-primary ms-2" disabled>Disconnect</button>
             </form>
         </section>
         <section class="border-top pt-5">
@@ -73,7 +74,10 @@ $(function() {
 
             const { name, room } = this;
             $(this).parents('#app').trigger('room:connect', [{ name: name.value, room: room.value }]);
-        });
+        })
+        .on('click', '#room-disconnect', function() {
+            $(this).trigger('room:disconnect');
+        })
     $('#room-votes')
         .submit(function(event) {
             event.preventDefault();
@@ -128,13 +132,26 @@ $(function() {
 
             client.activate();
         })
+        .on('room:disconnect', function() {
+            const client = $(this).data('client');
+            if (typeof client === 'undefined') {
+                return;
+            }
+            client.deactivate();
+            $(this).trigger('room:disconnected');
+        })
         .on('room:connected', function(event, { name, room }) {
             const client = $(this).data('client');
             client.publish({
                 destination: '/app/room-selection',
                 body: JSON.stringify({ name, room})
             });
-            $(this).find(':input').prop('disabled', true);
+            $(this)
+                .find(':input:not(#room-disconnect)')
+                .prop('disabled', true);
+            $(this)
+                .find('#room-disconnect')
+                .prop('disabled', false);
         })
         .on('room:connectionFailed', function() {
             console.log('There was an error connecting');
@@ -142,8 +159,11 @@ $(function() {
         .on('room:disconnected', function() {
             $(this)
                 .removeData('client')
-                .find(':input')
+                .find(':input:not(#room-disconnect)')
                 .prop('disabled', false);
+            $(this)
+                .find('#room-disconnect')
+                .prop('disabled', true);
 
             $(this)
                 .find('#room-votes tbody')

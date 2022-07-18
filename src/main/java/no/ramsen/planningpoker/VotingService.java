@@ -27,11 +27,25 @@ public class VotingService {
         this.sessionVotes.put(session, vote);
     }
 
+    public boolean isSessionDefined(String session) {
+        return this.sessionVotes.containsKey(session);
+    }
+
+    public void removeSession(String session) {
+        this.sessionVotes.remove(session);
+    }
+
     public List<Vote> getVotesByRoom(String room) {
         return this.sessionVotes
                 .values()
                 .stream()
                 .filter(vote -> vote.getRoom().equals(room))
                 .toList();
+    }
+
+    public Vote getVoteBySession(String session) {
+        if (this.sessionVotes.containsKey(session))
+            return this.sessionVotes.get(session);
+        return null;
     }
 }
