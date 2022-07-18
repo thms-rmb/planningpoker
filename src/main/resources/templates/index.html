@@ -137,11 +137,10 @@ $(function() {
         })
         .on('room:disconnect', function() {
             const client = $(this).data('client');
-            if (typeof client === 'undefined') {
-                return;
+            if (typeof client !== 'undefined') {
+                client.deactivate();
+                $(this).trigger('room:disconnected');
             }
-            client.deactivate();
-            $(this).trigger('room:disconnected');
         })
         .on('room:connected', function(event, { name, room }) {
             const client = $(this).data('client');
@@ -174,17 +173,21 @@ $(function() {
         })
         .on('room:vote', function(event, { sessionId, vote, name, room }) {
             const client = $(this).data('client');
-            client.publish({
-                destination: '/app/room-vote',
-                body: JSON.stringify({ sessionId, vote, name, room })
-            });
+            if (typeof client !== 'undefined') {
+                client.publish({
+                    destination: '/app/room-vote',
+                    body: JSON.stringify({ sessionId, vote, name, room })
+                });
+            }
         })
         .on('room:revealChange', function(event, { revealed, room }) {
             const client = $(this).data('client');
-            client.publish({
-                destination: '/app/reveal-change',
-                body: JSON.stringify({ revealed, room })
-            })
+            if (typeof client !== 'undefined') {
+                client.publish({
+                    destination: '/app/reveal-change',
+                    body: JSON.stringify({ revealed, room })
+                });
+            }
         });
 });
 </script>
