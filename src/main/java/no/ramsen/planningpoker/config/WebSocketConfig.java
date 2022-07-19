@@ -1,4 +1,4 @@
-package no.ramsen.planningpoker;
+package no.ramsen.planningpoker.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.ServerHttpRequest;

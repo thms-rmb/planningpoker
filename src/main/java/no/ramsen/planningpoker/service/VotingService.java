@@ -1,5 +1,7 @@
-package no.ramsen.planningpoker;
+package no.ramsen.planningpoker.service;
 
+import no.ramsen.planningpoker.pojo.RevealState;
+import no.ramsen.planningpoker.pojo.Vote;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;

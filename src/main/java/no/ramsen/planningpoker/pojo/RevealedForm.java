@@ -1,4 +1,4 @@
-package no.ramsen.planningpoker;
+package no.ramsen.planningpoker.pojo;
 
 public class RevealedForm {
     private boolean revealed;

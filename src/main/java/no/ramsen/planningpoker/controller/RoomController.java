@@ -1,5 +1,11 @@
-package no.ramsen.planningpoker;
+package no.ramsen.planningpoker.controller;
 
+import no.ramsen.planningpoker.pojo.RevealState;
+import no.ramsen.planningpoker.pojo.RevealedForm;
+import no.ramsen.planningpoker.pojo.RoomSelectionForm;
+import no.ramsen.planningpoker.pojo.Vote;
+import no.ramsen.planningpoker.service.VoterConnectionService;
+import no.ramsen.planningpoker.service.VotingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;

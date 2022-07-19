@@ -1,5 +1,6 @@
-package no.ramsen.planningpoker;
+package no.ramsen.planningpoker.service;
 
+import no.ramsen.planningpoker.pojo.RevealState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
