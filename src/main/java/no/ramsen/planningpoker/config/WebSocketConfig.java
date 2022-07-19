@@ -14,7 +14,7 @@ import java.util.UUID;
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-    private class StompPrincipal implements Principal {
+    private static class StompPrincipal implements Principal {
         private final String name;
 
         @Override
@@ -26,7 +26,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             this.name = name;
         }
     }
-    private class HandshakeHandler extends DefaultHandshakeHandler {
+
+    private static class HandshakeHandler extends DefaultHandshakeHandler {
         @Override
         protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler, Map<String, Object> attributes) {
             return new StompPrincipal(UUID.randomUUID().toString());

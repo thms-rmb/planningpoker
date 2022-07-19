@@ -13,7 +13,7 @@ import java.util.Map;
 @Configuration
 public class FaviconRequestConfig {
     @Bean
-    public static SimpleUrlHandlerMapping asBean(
+    public static SimpleUrlHandlerMapping faviconMapping(
             @Qualifier("faviconResourceRequestHandler") ResourceHttpRequestHandler faviconResourceRequestHandler) {
         return new SimpleUrlHandlerMapping(
                 Map.of("/favicon.svg", faviconResourceRequestHandler),
