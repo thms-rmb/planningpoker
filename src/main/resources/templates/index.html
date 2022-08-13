@@ -120,7 +120,7 @@ $(function() {
                 ready: ready.checked
             } ] );
         })
-        .on('input', 'input[type=text]', function(event) {
+        .on('change', 'select#vote', function(event) {
             $(event.delegateTarget).submit();
         })
         .on('change', 'input#ready', function(event) {
