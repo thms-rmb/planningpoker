@@ -47,7 +47,7 @@ public class RoomController {
         if (!this.votingService.isRoomDefined(room)) {
             this.votingService.putRoomReveal(room, RevealState.HIDDEN);
         }
-        var vote = new Vote(principal.getName(), room, roomSelectionForm.getName(), "");
+        var vote = new Vote(principal.getName(), room, roomSelectionForm.getName(), "", false);
         this.votingService.putSessionVote(principal.getName(), vote);
         this.voterConnectionService.updateRoom(room);
     }

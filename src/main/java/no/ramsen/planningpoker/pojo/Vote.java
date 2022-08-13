@@ -1,6 +1,7 @@
 package no.ramsen.planningpoker.pojo;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 public class Vote {
     @NotBlank
@@ -10,6 +11,8 @@ public class Vote {
     @NotBlank
     private String name;
     private String vote;
+    @NotNull
+    private boolean ready;
 
     public String getSessionId() {
         return sessionId;
@@ -43,10 +46,19 @@ public class Vote {
         this.vote = vote;
     }
 
-    public Vote(String sessionId, String room, String name, String vote) {
+    public boolean isReady() {
+        return ready;
+    }
+
+    public void setReady(boolean ready) {
+        this.ready = ready;
+    }
+
+    public Vote(String sessionId, String room, String name, String vote, boolean ready) {
         this.sessionId = sessionId;
         this.room = room;
         this.name = name;
         this.vote = vote;
+        this.ready = ready;
     }
 }
