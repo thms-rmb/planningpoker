@@ -35,7 +35,8 @@ public class RoomController {
                 "index",
                 Map.of(
                         "roomSelection", roomSelection,
-                        "votes", Map.of()
+                        "votes", Map.of(),
+                        "revealed", false
                 )
         );
     }

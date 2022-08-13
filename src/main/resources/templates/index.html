@@ -39,9 +39,13 @@
         <section class="border-top pt-5">
             <form id="room-votes">
                 <input type="hidden" th:value="${sessionId}" name="sessionId" id="sessionId">
-                <div class="form-check form-switch">
-                    <input type="checkbox" class="form-check-input" id="revealed" th:checked="${revealed}">
-                    <label for="revealed" class="form-check-label">Reveal votes</label>
+                <div>
+                    <input type="checkbox" class="btn-check" id="revealed" th:checked="${revealed}">
+                    <label for="revealed"
+                           class="btn btn-outline-primary"
+                           th:text="${revealed ? 'Hide votes' : 'Reveal votes'}">
+                        Reveal votes
+                    </label>
                 </div>
                 <table class="table">
                     <thead>
@@ -58,7 +62,17 @@
                                 Participant Name
                             </th>
                             <td th:remove="${vote.sessionId != sessionId}? all : none">
-                                <input type="text" class="form-control" name="vote" id="vote" th:value="${vote.vote}">
+                                <select name="vote" id="vote" class="form-select">
+                                    <option th:attrappend="selected=${vote.vote == '' ? 'selected' : ''}">
+                                        Please select a vote
+                                    </option>
+                                    <option th:each="voteOption : ${new String[]{'0', '½', '1', '2', '3', '5', '8'}}"
+                                            th:value="${voteOption}"
+                                            th:text="${voteOption}"
+                                            th:attrappend="selected=${vote.vote == voteOption ? 'selected' : ''}">
+                                        ½
+                                    </option>
+                                </select>
                             </td>
                             <td th:remove="${vote.sessionId == sessionId}? all : none" th:text="${revealed}? ${vote.vote} : '…'">
                                 Participant Vote
