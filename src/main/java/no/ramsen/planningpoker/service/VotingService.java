@@ -50,4 +50,15 @@ public class VotingService {
             return this.sessionVotes.get(session);
         return null;
     }
+
+    public void resetRoom(String room) {
+        if (this.roomReveals.containsKey(room)) {
+            this.roomReveals.put(room, RevealState.HIDDEN);
+        }
+
+        for (var vote : this.getVotesByRoom(room)) {
+            vote.setVote("");
+            vote.setReady(false);
+        }
+    }
 }

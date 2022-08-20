@@ -40,12 +40,19 @@
             <form id="room-votes">
                 <input type="hidden" th:value="${sessionId}" name="sessionId" id="sessionId">
                 <div>
-                    <input type="checkbox" class="btn-check" id="revealed" th:checked="${revealed}">
+                    <input type="checkbox"
+                           class="btn-check"
+                           id="revealed"
+                           th:checked="${revealed}"
+                           th:disabled="${sessionId == null}">
                     <label for="revealed"
                            class="btn btn-outline-primary"
                            th:text="${revealed ? 'Hide votes' : 'Reveal votes'}">
                         Reveal votes
                     </label>
+                    <button id="room-reset"
+                            class="btn btn-outline-secondary"
+                            th:disabled="${sessionId == null}">Reset votes</button>
                 </div>
                 <table class="table">
                     <thead>
@@ -117,7 +124,7 @@ $(function() {
                 vote: vote.value,
                 name: name.value,
                 room: room.value,
-                ready: ready.checked
+                ready: ready.checked,
             } ] );
         })
         .on('change', 'select#vote', function(event) {
@@ -131,6 +138,12 @@ $(function() {
             const { room } = $('#room-selection').get(0);
             $(this).trigger('room:revealChange', [ {
                 revealed: $(this).prop('checked'),
+                room: room.value,
+            } ] );
+        })
+        .on('click', '#room-reset', function() {
+            const { room } = $('#room-selection').get(0);
+            $(this).trigger('room:reset', [ {
                 room: room.value,
             } ] );
         });
@@ -218,6 +231,16 @@ $(function() {
                 client.publish({
                     destination: '/app/reveal-change',
                     body: JSON.stringify({ revealed, room })
+                });
+            }
+        })
+        .on('room:reset', function(event, { room }) {
+            $('#revealed, #ready').prop('checked', false);
+            const client = $(this).data('client');
+            if (typeof client !== 'undefined') {
+                client.publish({
+                    destination: '/app/room-reset',
+                    body: JSON.stringify({ room })
                 });
             }
         });

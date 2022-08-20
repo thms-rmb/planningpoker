@@ -1,9 +1,6 @@
 package no.ramsen.planningpoker.controller;
 
-import no.ramsen.planningpoker.pojo.RevealState;
-import no.ramsen.planningpoker.pojo.RevealedForm;
-import no.ramsen.planningpoker.pojo.RoomSelectionForm;
-import no.ramsen.planningpoker.pojo.Vote;
+import no.ramsen.planningpoker.pojo.*;
 import no.ramsen.planningpoker.service.VoterConnectionService;
 import no.ramsen.planningpoker.service.VotingService;
 import org.slf4j.Logger;
@@ -66,6 +63,13 @@ public class RoomController {
                 room,
                 revealedForm.isRevealed() ? RevealState.REVEALED : RevealState.HIDDEN
         );
+        this.voterConnectionService.updateRoom(room);
+    }
+
+    @MessageMapping("/room-reset")
+    public void roomReset(@Valid RoomForm roomForm) {
+        var room = roomForm.room();
+        this.votingService.resetRoom(room);
         this.voterConnectionService.updateRoom(room);
     }
 }
