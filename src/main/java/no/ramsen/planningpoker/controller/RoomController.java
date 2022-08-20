@@ -41,11 +41,11 @@ public class RoomController {
     @MessageMapping("/room-selection")
     public void roomSelection(@Valid RoomSelectionForm roomSelectionForm, Principal principal) {
         this.logger.info(principal.getName());
-        var room = roomSelectionForm.getRoom();
+        var room = roomSelectionForm.room();
         if (!this.votingService.isRoomDefined(room)) {
             this.votingService.putRoomReveal(room, RevealState.HIDDEN);
         }
-        var vote = new Vote(principal.getName(), room, roomSelectionForm.getName(), "", false);
+        var vote = new Vote(principal.getName(), room, roomSelectionForm.name(), "", false);
         this.votingService.putSessionVote(principal.getName(), vote);
         this.voterConnectionService.updateRoom(room);
     }
@@ -53,15 +53,15 @@ public class RoomController {
     @MessageMapping("/room-vote")
     public void roomVote(@Valid Vote vote, Principal principal) {
         this.votingService.putSessionVote(principal.getName(), vote);
-        this.voterConnectionService.updateRoom(vote.getRoom());
+        this.voterConnectionService.updateRoom(vote.room());
     }
 
     @MessageMapping("/reveal-change")
     public void revealChange(@Valid RevealedForm revealedForm) {
-        var room = revealedForm.getRoom();
+        var room = revealedForm.room();
         this.votingService.putRoomReveal(
                 room,
-                revealedForm.isRevealed() ? RevealState.REVEALED : RevealState.HIDDEN
+                revealedForm.revealed() ? RevealState.REVEALED : RevealState.HIDDEN
         );
         this.voterConnectionService.updateRoom(room);
     }

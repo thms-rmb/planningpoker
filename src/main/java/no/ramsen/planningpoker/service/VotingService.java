@@ -41,7 +41,7 @@ public class VotingService {
         return this.sessionVotes
                 .values()
                 .stream()
-                .filter(vote -> vote.getRoom().equals(room))
+                .filter(vote -> vote.room().equals(room))
                 .toList();
     }
 
@@ -56,9 +56,14 @@ public class VotingService {
             this.roomReveals.put(room, RevealState.HIDDEN);
         }
 
-        for (var vote : this.getVotesByRoom(room)) {
-            vote.setVote("");
-            vote.setReady(false);
-        }
+        this.sessionVotes.replaceAll((sessionId, vote) -> {
+            if (!vote.room().equals(room)) {
+                return vote;
+            }
+
+            return new Vote(
+                    vote.sessionId(), vote.room(), vote.name(), "", false
+            );
+        });
     }
 }

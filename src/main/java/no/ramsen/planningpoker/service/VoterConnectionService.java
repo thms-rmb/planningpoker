@@ -37,7 +37,7 @@ public class VoterConnectionService {
             return;
 
         var vote = this.votingService.getVoteBySession(userName);
-        var room = vote.getRoom();
+        var room = vote.room();
         this.votingService.removeSession(userName);
         this.updateRoom(room);
     }
@@ -46,7 +46,7 @@ public class VoterConnectionService {
         var votes = this.votingService.getVotesByRoom(room);
         var revealState = this.votingService.getRoomReveal(room);
         for (var vote : votes) {
-            var sessionId = vote.getSessionId();
+            var sessionId = vote.sessionId();
             var context = new Context();
             context.setVariable("votes", votes);
             context.setVariable("sessionId", sessionId);
