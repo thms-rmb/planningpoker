@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Planning Poker</title>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.2/css/bootstrap.min.css"
+          integrity="sha512-CpIKUSyh9QX2+zSdfGP+eWLx23C8Dj9/XmHjZY2uDtfkdLGo0uY12jgcnkX9vXOgYajEKb/jiw67EYm+kBf+6g=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.3/socket.io.min.js"
+            integrity="sha512-GtM/5c/Ie0lStj6QwEG0HkpMQuGr9vrOAgFD4nNmImviyZvsJxN7TYU7b+R7Kthob0zFBUpuxfl3R3Mn1qekTw=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"
+            integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"></script>
+    <!-- Alpine Plugins -->
+    <script defer src="https://unpkg.com/@alpinejs/morph@3.x.x/dist/cdn.min.js"></script>
+    <!-- Alpine Core -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body>
+<div class="col-lg-8 mx-auto p-3 py-md-5">
+    <header class="border-bottom mb-5">
+        <h1 class="fs-4">Planning Poker</h1>
+    </header>
+    <main id="app">
+    <section class="pb-5">
+        <form id="room-selection">
+            <div class="mb-2">
+                <label class="form-label" for="name">Name</label>
+                <input type="text" class="form-control" name="name" id="name">
+                <div class="form-text">Please enter your participant name.</div>
+            </div>
+            <div class="mb-2">
+                <label class="form-label" for="room">Room</label>
+                <input type="text" class="form-control" name="room" id="room">
+                <div class="form-text">Please enter a room ID.</div>
+            </div>
+            <button id="room-connect" type="submit" class="btn btn-primary">Connect</button>
+            <button id="room-disconnect" class="btn btn-outline-primary ms-2" disabled>Disconnect</button>
+        </form>
+    </section>
+    <section class="border-top pt-5">
+        {% include "estimations.html" %}
+    </section>
+</main>
+</div>
+<script>
+  $(function() {
+    $('#room-selection')
+      .submit(function(event) {
+        event.preventDefault();
+
+        const { name, room } = this;
+            $(this).parents('#app').trigger('room:connect', [{ name: name.value, room: room.value }]);
+      })
+      .on('click', '#room-disconnect', function() {
+        $(this).trigger('room:disconnect');
+      });
+
+    $('#room-estimations')
+      .submit(function (event) {
+        event.preventDefault();
+
+        const { sessionId, estimation, ready } = this;
+        const { name, room } = $('#room-selection').get(0);
+
+        $(this).trigger('room:estimate', [ {
+          sessionId: sessionId.value,
+          estimation: estimation.value,
+          name: name.value,
+          room: room.value,
+          ready: ready.checked,
+        } ]);
+      })
+      .on('change', 'select#estimation', function (event) {
+        $(event.delegateTarget).submit();
+      })
+      .on('change', 'input#ready', function (event) {
+        $(event.delegateTarget).submit();
+      })
+      .on('change', 'input#revealed', function (event) {
+        event.preventDefault();
+
+        const { room } = $('#room-selection').get(0);
+        $(this).trigger('room:revealChange', [ {
+          revealed: $(this).prop('checked'),
+          room: room.value,
+        } ]);
+      })
+      .on('click', '#room-reset', function () {
+        const { room } = $('#room-selection').get(0);
+        $(this).trigger('room:reset', [ {
+          room: room.value,
+        } ]);
+      });
+
+    $('#app')
+      .on('room:connect', function (event, { name, room }) {
+        const socket = io();
+        $(this).data('socket', socket);
+
+        socket.on('connect', () => {
+          console.log(`Connection ID: ${socket.id}`);
+
+          socket.on('room-estimations', message => {
+            console.log(`Message received:`, message);
+
+            Alpine.morph(document.getElementById('room-estimations'), message);
+          });
+
+          $(this).trigger('room:connected', [ { name, room } ]);
+        });
+
+        socket.on('connect_error', () => {
+          $(this).trigger('room:connectionFailed');
+        });
+
+        socket.on('disconnect', () => {
+          $(this).trigger('room:disconnected');
+        });
+      })
+      .on('room:connected', function (event, { name, room }) {
+        const socket = $(this).data('socket');
+        socket.emit('room-selection', { name, room });
+
+        $(this)
+          .find(':input:not(#room-disconnect)')
+          .prop('disabled', true);
+        $(this)
+          .find('#room-disconnect')
+          .prop('disabled', false);
+      })
+      .on('room:connectionFailed', function () {
+        console.log('There was an error connecting');
+      })
+      .on('room:disconnect', function () {
+        const socket = $(this).data('socket');
+        if (typeof socket !== 'undefined') {
+          socket.disconnect();
+          $(this).trigger('room:disconnected');
+        }
+      })
+      .on('room:disconnected', function () {
+        $(this)
+          .removeData('socket')
+          .find(':input:not(#room-disconnect)')
+          .prop('disabled', false);
+        $(this)
+          .find('#room-disconnect')
+          .prop('disabled', true);
+        $(this)
+          .find('#room-estimations tbody')
+          .empty();
+      })
+      .on('room:estimate', function (event, { sessionId, estimation, name, room, ready }) {
+        const socket = $(this).data('socket');
+        if (typeof socket !== 'undefined') {
+          socket.emit('room-estimate', { sessionId, estimation, name, room, ready });
+        }
+      })
+      .on('room:revealChange', function (event, { revealed, room }) {
+        const socket = $(this).data('socket');
+        if (typeof socket !== 'undefined') {
+          socket.emit('room-reveal', { revealed, room });
+        }
+      })
+      .on('room:reset', function (event, { room }) {
+        $('#revealed, #ready').prop('checked', false);
+        const socket = $(this).data('socket');
+        if (typeof socket !== 'undefined') {
+          socket.emit('room-reset', { room });
+        }
+      });
+  });
+</script>
+</body>
+</html>
