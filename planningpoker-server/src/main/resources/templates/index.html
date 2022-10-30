@@ -16,23 +16,23 @@
     </header>
     <main id="app">
         <section class="pb-5">
-            <form id="room-selection" th:object="${roomSelection}">
+            <form id="roomEntity-selection" th:object="${roomSelection}">
                 <div class="mb-2">
                     <label class="form-label" for="name">Name</label>
                     <input type="text" class="form-control" name="name" id="name" th:field="*{name}">
                     <div class="form-text">Please enter your participant name.</div>
                 </div>
                 <div class="mb-2">
-                    <label class="form-label" for="room">Room</label>
-                    <input type="text" class="form-control" name="room" id="room" th:field="*{room}">
-                    <div class="form-text">Please enter a room ID.</div>
+                    <label class="form-label" for="roomEntity">Room</label>
+                    <input type="text" class="form-control" name="roomEntity" id="roomEntity" th:field="*{roomEntity}">
+                    <div class="form-text">Please enter a roomEntity ID.</div>
                 </div>
-                <button id="room-connect" type="submit" class="btn btn-primary">Connect</button>
-                <button id="room-disconnect" class="btn btn-outline-primary ms-2" disabled>Disconnect</button>
+                <button id="roomEntity-connect" type="submit" class="btn btn-primary">Connect</button>
+                <button id="roomEntity-disconnect" class="btn btn-outline-primary ms-2" disabled>Disconnect</button>
             </form>
         </section>
         <section class="border-top pt-5">
-            <form id="room-votes">
+            <form id="roomEntity-voteEntities">
                 <input type="hidden" th:value="${sessionId}" name="sessionId" id="sessionId">
                 <div>
                     <input type="checkbox"
@@ -42,12 +42,12 @@
                            th:disabled="${sessionId == null}">
                     <label for="revealed"
                            class="btn btn-outline-primary"
-                           th:text="${revealed ? 'Hide votes' : 'Reveal votes'}">
-                        Reveal votes
+                           th:text="${revealed ? 'Hide voteEntities' : 'Reveal voteEntities'}">
+                        Reveal voteEntities
                     </label>
-                    <button id="room-reset"
+                    <button id="roomEntity-reset"
                             class="btn btn-outline-secondary"
-                            th:disabled="${sessionId == null}">Reset votes</button>
+                            th:disabled="${sessionId == null}">Reset voteEntities</button>
                 </div>
                 <table class="table">
                     <thead>
@@ -58,7 +58,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="vote : ${votes}"
+                        <tr th:each="vote : ${voteEntities}"
                             th:classappend="${!revealed and vote.ready ? 'table-success' : ''}">
                             <th scope="row" th:text="${vote.name}">
                                 Participant Name
@@ -97,28 +97,28 @@
 </div>
 <script th:inline="javascript">
 $(function() {
-    $('#room-selection')
+    $('#roomEntity-selection')
         .submit(function(event) {
             event.preventDefault();
 
-            const { name, room } = this;
-            $(this).parents('#app').trigger('room:connect', [{ name: name.value, room: room.value }]);
+            const { name, roomEntity } = this;
+            $(this).parents('#app').trigger('roomEntity:connect', [{ name: name.value, roomEntity: roomEntity.value }]);
         })
-        .on('click', '#room-disconnect', function() {
-            $(this).trigger('room:disconnect');
+        .on('click', '#roomEntity-disconnect', function() {
+            $(this).trigger('roomEntity:disconnect');
         })
-    $('#room-votes')
+    $('#roomEntity-voteEntities')
         .submit(function(event) {
             event.preventDefault();
 
             const { sessionId, vote, ready } = this;
-            const { name, room } = $('#room-selection').get(0);
+            const { name, roomEntity } = $('#roomEntity-selection').get(0);
 
-            $(this).trigger('room:vote', [ {
+            $(this).trigger('roomEntity:vote', [ {
                 sessionId: sessionId.value,
                 vote: vote.value,
                 name: name.value,
-                room: room.value,
+                roomEntity: roomEntity.value,
                 ready: ready.checked,
             } ] );
         })
@@ -130,20 +130,20 @@ $(function() {
         })
         .on('change', 'input#revealed', function(event) {
             event.preventDefault();
-            const { room } = $('#room-selection').get(0);
-            $(this).trigger('room:revealChange', [ {
+            const { roomEntity } = $('#roomEntity-selection').get(0);
+            $(this).trigger('roomEntity:revealChange', [ {
                 revealed: $(this).prop('checked'),
-                room: room.value,
+                roomEntity: roomEntity.value,
             } ] );
         })
-        .on('click', '#room-reset', function() {
-            const { room } = $('#room-selection').get(0);
-            $(this).trigger('room:reset', [ {
-                room: room.value,
+        .on('click', '#roomEntity-reset', function() {
+            const { roomEntity } = $('#roomEntity-selection').get(0);
+            $(this).trigger('roomEntity:reset', [ {
+                roomEntity: roomEntity.value,
             } ] );
         });
     $('#app')
-        .on('room:connect', function(event, { name, room }) {
+        .on('roomEntity:connect', function(event, { name, roomEntity }) {
             const protocol = window.location.protocol.startsWith('https:')
                 ? 'wss:'
                 : 'ws:';
@@ -158,84 +158,84 @@ $(function() {
                 const userName = headers['user-name'];
                 console.log(`Client user name: ${userName}`);
 
-                client.subscribe(`/user/${userName}/room/${room}/votes`, message => {
-                    Alpine.morph(document.getElementById('room-votes'), message.body);
+                client.subscribe(`/user/${userName}/roomEntity/${roomEntity}/voteEntities`, message => {
+                    Alpine.morph(document.getElementById('roomEntity-voteEntities'), message.body);
                 });
 
-                $(this).trigger('room:connected', [{ name, room }]);
+                $(this).trigger('roomEntity:connected', [{ name, roomEntity }]);
             };
 
             client.onWebSocketError = () => {
-                $(this).trigger('room:connectionFailed');
+                $(this).trigger('roomEntity:connectionFailed');
             }
 
             client.onWebSocketClose = () => {
-                $(this).trigger('room:disconnected');
+                $(this).trigger('roomEntity:disconnected');
             }
 
             client.activate();
         })
-        .on('room:disconnect', function() {
+        .on('roomEntity:disconnect', function() {
             const client = $(this).data('client');
             if (typeof client !== 'undefined') {
                 client.deactivate();
-                $(this).trigger('room:disconnected');
+                $(this).trigger('roomEntity:disconnected');
             }
         })
-        .on('room:connected', function(event, { name, room }) {
+        .on('roomEntity:connected', function(event, { name, roomEntity }) {
             const client = $(this).data('client');
             client.publish({
-                destination: '/app/room-selection',
-                body: JSON.stringify({ name, room})
+                destination: '/app/roomEntity-selection',
+                body: JSON.stringify({ name, roomEntity})
             });
             $(this)
-                .find(':input:not(#room-disconnect)')
+                .find(':input:not(#roomEntity-disconnect)')
                 .prop('disabled', true);
             $(this)
-                .find('#room-disconnect')
+                .find('#roomEntity-disconnect')
                 .prop('disabled', false);
         })
-        .on('room:connectionFailed', function() {
+        .on('roomEntity:connectionFailed', function() {
             console.log('There was an error connecting');
         })
-        .on('room:disconnected', function() {
+        .on('roomEntity:disconnected', function() {
             $(this)
                 .removeData('client')
-                .find(':input:not(#room-disconnect)')
+                .find(':input:not(#roomEntity-disconnect)')
                 .prop('disabled', false);
             $(this)
-                .find('#room-disconnect')
+                .find('#roomEntity-disconnect')
                 .prop('disabled', true);
 
             $(this)
-                .find('#room-votes tbody')
+                .find('#roomEntity-voteEntities tbody')
                 .empty();
         })
-        .on('room:vote', function(event, { sessionId, vote, name, room, ready }) {
+        .on('roomEntity:vote', function(event, { sessionId, vote, name, roomEntity, ready }) {
             const client = $(this).data('client');
             if (typeof client !== 'undefined') {
                 client.publish({
-                    destination: '/app/room-vote',
-                    body: JSON.stringify({ sessionId, vote, name, room, ready })
+                    destination: '/app/roomEntity-vote',
+                    body: JSON.stringify({ sessionId, vote, name, roomEntity, ready })
                 });
             }
         })
-        .on('room:revealChange', function(event, { revealed, room }) {
+        .on('roomEntity:revealChange', function(event, { revealed, roomEntity }) {
             const client = $(this).data('client');
             if (typeof client !== 'undefined') {
                 client.publish({
                     destination: '/app/reveal-change',
-                    body: JSON.stringify({ revealed, room })
+                    body: JSON.stringify({ revealed, roomEntity })
                 });
             }
         })
-        .on('room:reset', function(event, { room }) {
+        .on('roomEntity:reset', function(event, { roomEntity }) {
             $('#revealed, #ready').prop('checked', false);
             const client = $(this).data('client');
             if (typeof client !== 'undefined') {
                 client.publish({
-                    destination: '/app/room-reset',
-                    body: JSON.stringify({ room })
+                    destination: '/app/roomEntity-reset',
+                    body: JSON.stringify({ roomEntity })
                 });
             }
         });
