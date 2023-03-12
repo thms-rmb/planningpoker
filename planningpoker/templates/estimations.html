@@ -1,0 +1,68 @@
+<form id="room-estimations">
+    <input type="hidden" name="sessionId" id="sessionId" value="{{ session_id }}">
+    <div>
+        <input type="checkbox"
+               class="btn-check"
+               id="revealed"
+               {{ dict(checked=revealed or none, disabled=none if session_id else true) | xmlattr }}>
+        <label for="revealed"
+               class="btn btn-outline-primary">
+            {% if revealed %}Hide estimations{% else %}Reveal estimations{% endif %}
+        </label>
+        <button id="room-reset"
+                class="btn btn-outline-secondary"
+                {{ dict(disabled=none if session_id else true) | xmlattr }}>Reset estimations</button>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Participant Name</th>
+                <th><label for="estimation">Participant Estimation</label></th>
+                <th>Participant Ready Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for estimation in estimations %}
+            <tr {{ dict(class="table-success" if not revealed and estimation.ready else none) | xmlattr }}>
+                <th scope="row">
+                    {{ estimation.user_name }}
+                </th>
+                {% if estimation.session_id == session_id %}
+                <td>
+                    <select name="estimation" id="estimation" class="form-select">
+                        <option {{ dict(selected=estimation.estimation_value == "" or none) | xmlattr }}>
+                            Please select a vote
+                        </option>
+                        {% for option in ['0', '½', '1', '2', '3', '5', '8'] %}
+                        <option {{ dict(value=option, selected=estimation.estimation_value == option or none) | xmlattr }}>
+                            {{ option }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </td>
+                {% else %}
+                <td>
+                    {{ revealed and estimation.estimation_value or "…" }}
+                </td>
+                {% endif %}
+                {% if estimation.session_id == session_id %}
+                <td>
+                    <div class="form-check">
+                        <input type="checkbox"
+                               name="ready"
+                               id="ready"
+                               class="form-check-input"
+                                {{ dict(checked=estimation.ready or none) | xmlattr }}>
+                        <label for="ready" class="form-check-label">Ready</label>
+                    </div>
+                </td>
+                {% else %}
+                <td>
+                    {{ estimation.ready and "Ready" or "Not Ready" }}
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</form>

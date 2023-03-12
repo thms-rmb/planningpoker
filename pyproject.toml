@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["planningpoker"]
+
+[project]
+name = "planningpoker"
+version = "0.0.1"
+dependencies = [
+    "eventlet",
+    "Flask",
+    "blinker",
+    "watchdog",
+    "Flask-SocketIO",
+
+    # https://github.com/benoitc/gunicorn/issues/2828
+    "gunicorn @ https://github.com/benoitc/gunicorn/archive/69c508a.zip#egg=gunicorn==20.1.0",
+
+    "SQLAlchemy>=2.0.0b2",
+    "Flask-SQLAlchemy",
+    "Flask-Migrate",
+]
