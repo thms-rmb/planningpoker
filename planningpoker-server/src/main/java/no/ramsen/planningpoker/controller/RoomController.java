@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,22 +27,23 @@ public class RoomController {
     private final Logger logger = LoggerFactory.getLogger(RoomController.class);
     private final VoterConnectionService voterConnectionService;
     private final VotingService votingService;
+    private final List<String> voteOptions;
 
-    public RoomController(VoterConnectionService voterConnectionService, VotingService votingService) {
+    public RoomController(VoterConnectionService voterConnectionService, VotingService votingService, @Value("${planningpoker.vote-options}") List<String> voteOptions) {
         this.voterConnectionService = voterConnectionService;
         this.votingService = votingService;
+        this.voteOptions = voteOptions;
     }
 
     @GetMapping("/")
     public ModelAndView index(@ModelAttribute RoomSelectionForm roomSelection) {
-        List<String> voteOptions = List.of("0", "½", "1", "2", "3", "5", "8");
         return new ModelAndView(
                 "index",
                 Map.of(
                         "roomSelection", roomSelection,
                         "votes", Map.of(),
                         "revealed", false,
-                        "voteOptions", voteOptions
+                        "voteOptions", this.voteOptions
                 )
         );
     }

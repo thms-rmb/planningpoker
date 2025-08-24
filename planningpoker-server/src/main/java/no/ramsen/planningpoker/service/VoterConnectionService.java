@@ -1,9 +1,11 @@
 package no.ramsen.planningpoker.service;
 
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -21,11 +23,13 @@ public class VoterConnectionService {
     private final SpringTemplateEngine springTemplateEngine;
 
     private final VotingService votingService;
+    private final List<String> voteOptions;
 
-    public VoterConnectionService(SimpMessagingTemplate simpMessagingTemplate, SpringTemplateEngine springTemplateEngine, VotingService votingService) {
+    public VoterConnectionService(SimpMessagingTemplate simpMessagingTemplate, SpringTemplateEngine springTemplateEngine, VotingService votingService, @Value("${planningpoker.vote-options}") List<String> voteOptions) {
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.springTemplateEngine = springTemplateEngine;
         this.votingService = votingService;
+        this.voteOptions = voteOptions;
     }
 
     @EventListener
@@ -52,6 +56,7 @@ public class VoterConnectionService {
             context.setVariable("votes", votes);
             context.setVariable("sessionId", sessionId);
             context.setVariable("revealed", revealState == RevealState.REVEALED);
+            context.setVariable("voteOptions", this.voteOptions);
             var results = this.springTemplateEngine.process("index", Set.of("#room-votes"), context);
             logger.info("Going to send to {}:\n\n{}", sessionId, results);
             this.simpMessagingTemplate.convertAndSendToUser(sessionId, String.format("/room/%s/votes", room), results);
