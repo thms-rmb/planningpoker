@@ -1,8 +1,9 @@
 package no.ramsen.planningpoker.controller;
 
-import no.ramsen.planningpoker.pojo.*;
-import no.ramsen.planningpoker.service.VoterConnectionService;
-import no.ramsen.planningpoker.service.VotingService;
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -12,8 +13,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.ModelAndView;
 
 import jakarta.validation.Valid;
-import java.security.Principal;
-import java.util.Map;
+import no.ramsen.planningpoker.pojo.RevealState;
+import no.ramsen.planningpoker.pojo.RevealedForm;
+import no.ramsen.planningpoker.pojo.RoomForm;
+import no.ramsen.planningpoker.pojo.RoomSelectionForm;
+import no.ramsen.planningpoker.pojo.Vote;
+import no.ramsen.planningpoker.service.VoterConnectionService;
+import no.ramsen.planningpoker.service.VotingService;
 
 @Controller
 public class RoomController {
@@ -28,12 +34,14 @@ public class RoomController {
 
     @GetMapping("/")
     public ModelAndView index(@ModelAttribute RoomSelectionForm roomSelection) {
+        List<String> voteOptions = List.of("0", "½", "1", "2", "3", "5", "8");
         return new ModelAndView(
                 "index",
                 Map.of(
                         "roomSelection", roomSelection,
                         "votes", Map.of(),
-                        "revealed", false
+                        "revealed", false,
+                        "voteOptions", voteOptions
                 )
         );
     }

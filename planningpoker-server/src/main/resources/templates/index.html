@@ -68,7 +68,7 @@
                                     <option th:attrappend="selected=${vote.vote == '' ? 'selected' : ''}">
                                         Please select a vote
                                     </option>
-                                    <option th:each="voteOption : ${new String[]{'0', '½', '1', '2', '3', '5', '8'}}"
+                                    <option th:each="voteOption : ${voteOptions}"
                                             th:value="${voteOption}"
                                             th:text="${voteOption}"
                                             th:attrappend="selected=${vote.vote == voteOption ? 'selected' : ''}">
