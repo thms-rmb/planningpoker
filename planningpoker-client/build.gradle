@@ -1,0 +1,28 @@
+plugins {
+    id "java-library"
+}
+
+group = "no.ramsen"
+description = "Planning Poker Client"
+
+task npmInstall(type: Exec) {
+    description = "Install npm dependencies using ci"
+    commandLine "npm", "ci"
+}
+
+task npmBuild(type: Exec) {
+    description = "Build frontend using npm"
+    commandLine "npm", "run", "build"
+    dependsOn npmInstall
+}
+
+clean {
+    delete "dist", "node_modules"
+}
+
+jar {
+    from("dist") {
+        into("META-INF/resources/webjars/planningpoker-client/${version}")
+    }
+    dependsOn npmBuild
+}

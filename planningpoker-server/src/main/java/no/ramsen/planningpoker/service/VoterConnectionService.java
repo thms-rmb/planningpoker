@@ -1,6 +1,7 @@
 package no.ramsen.planningpoker.service;
 
-import no.ramsen.planningpoker.pojo.RevealState;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
@@ -8,9 +9,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.thymeleaf.context.Context;
-import org.thymeleaf.spring5.SpringTemplateEngine;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import java.util.Set;
+import no.ramsen.planningpoker.pojo.RevealState;
 
 @Service
 public class VoterConnectionService {

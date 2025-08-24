@@ -16,7 +16,7 @@ public class FaviconRequestConfig {
     public static SimpleUrlHandlerMapping faviconMapping(
             @Qualifier("faviconResourceRequestHandler") ResourceHttpRequestHandler faviconResourceRequestHandler) {
         return new SimpleUrlHandlerMapping(
-                Map.of("/server/src/main/resources/favicon.svg", faviconResourceRequestHandler),
+                Map.of("/favicon.svg", faviconResourceRequestHandler),
                 Integer.MIN_VALUE
         );
     }
@@ -24,7 +24,7 @@ public class FaviconRequestConfig {
     @Bean("faviconResourceRequestHandler")
     public static ResourceHttpRequestHandler faviconResourceRequestHandler() {
         var handler = new ResourceHttpRequestHandler();
-        var resource = new ClassPathResource("server/src/main/resources/favicon.svg");
+        var resource = new ClassPathResource("assets/");
         handler.setLocations(List.of(resource));
         return handler;
     }

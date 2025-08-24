@@ -1,6 +1,6 @@
 package no.ramsen.planningpoker.pojo;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 public record RoomSelectionForm(
         @NotBlank String name,

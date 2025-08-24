@@ -1,0 +1,4 @@
+rootProject.name = "planningpoker"
+
+include "planningpoker-client"
+include "planningpoker-server"
